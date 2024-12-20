@@ -32,7 +32,7 @@ class AsyncUDPListener:
         try:
             # Parse JSON data
             packet_dict = json.loads(data.decode())
-            if packet_dict.get('type') == 'PAYLOAD_SUMMARY':
+            if packet_dict.get("type") == "PAYLOAD_SUMMARY":
                 if self.callback:
                     await self.callback(packet_dict)  # Run callback
         except Exception as e:
@@ -49,7 +49,7 @@ class AsyncUDPListener:
         loop = asyncio.get_running_loop()
         transport, protocol = await loop.create_datagram_endpoint(
             lambda: _UDPProtocol(self.handle_packet),
-            local_addr=('0.0.0.0', self.udp_port),
+            local_addr=("0.0.0.0", self.udp_port),
         )
 
         try:

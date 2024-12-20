@@ -15,7 +15,7 @@ class Utils:
     def is_within_range(base_coordinates, sonde_coordinates, range_km):
         distance = Utils.get_distance(base_coordinates, sonde_coordinates)
         return distance <= range_km
-    
+
     @staticmethod
     async def send_notification(message_body, title):
         settings = Settings.load_settings()
@@ -26,8 +26,26 @@ class Utils:
             if service.enabled:
                 apobj.add(service.url)
 
-         # notify all of the services loaded into our Apprise object.
+        # notify all of the services loaded into our Apprise object.
         await apobj.async_notify(body=message_body, title=title)
+
+    @staticmethod
+    async def map_json_to_radiosonde_payload(json_payload: dict):
+        """Mapp
+        {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [1.1515, 43.0685, 8021]}, 'properties': {'id': 'MEA901464', 'type': 'M20', 'startplace': 'Aire Sur Adour\t(FR)', 'frequency': '404.00 MHz', 'report': '2024-12-20 10:34:54z', 'speed': '78 km/h', 'course': '158 °', 'climbing': '-10.0 m/s', 'altitude': '8021 m', 'latitude': '43.0685', 'longitude': '1.1515', 'icon': 'sondeIcon'}}
+        to a RadiosondePayload object
+        """
+        return RadiosondePayload(
+            callsign=json_payload["properties"]["id"],
+            model=json_payload["properties"]["type"],
+            freq=float(json_payload["properties"]["frequency"].replace(" MHz", "")),
+            batt=-1,
+            vel_v=float(json_payload["properties"]["climbing"].replace(" m/s", "")),
+            vel_h=float(json_payload["properties"]["speed"].replace(" km/h", "")),
+            altitude=int(json_payload["properties"]["altitude"].replace(" m", "")),
+            latitude=float(json_payload["properties"]["latitude"]),
+            longitude=float(json_payload["properties"]["longitude"]),
+        )
 
     @staticmethod
     async def send_landing_notification(packet: RadiosondePayload):
@@ -57,8 +75,7 @@ Click the link to view the location on Google Maps: [Google Maps](https://www.go
 If you're planning retrieval, ensure you have the necessary equipment and safety precautions. The area might be remote or challenging to access.
 """
 
-        await Utils.send_notification(message_body, '🚨 Radiosonde Alert 🚨')
-
+        await Utils.send_notification(message_body, "🚨 Radiosonde Alert 🚨")
 
     @staticmethod
     async def send_threshold_notification(packet: RadiosondePayload):
@@ -82,5 +99,4 @@ The radiosonde is within {settings.notification_thresholds.distance_km} km and b
 Click the link to view the location on Google Maps: [Google Maps](https://www.google.com/maps?q={packet.latitude},{packet.longitude})
 """
 
-
-        await Utils.send_notification(message_body, '🚨 Radiosonde Alert 🚨')
+        await Utils.send_notification(message_body, "🚨 Radiosonde Alert 🚨")

@@ -32,7 +32,7 @@ def configure_logger(base_path: Path):
                 "class": "logging.handlers.TimedRotatingFileHandler",
                 "level": "DEBUG",
                 "formatter": "detailed",
-                "filename": base_path / 'data/logs/radiosonde_auto_rx_notifier.log',
+                "filename": base_path / "data/logs/radiosonde_auto_rx_notifier.log",
                 "when": "midnight",
                 "interval": 1,
                 "backupCount": 7,
